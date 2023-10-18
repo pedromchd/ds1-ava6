@@ -3,7 +3,9 @@ import cx from 'classnames';
 
 function SearchBox({ setQueryReq }) {
     return (
-        <input type="search" placeholder="Digite o nome da cidade..." onChange={(e) => setQueryReq(e.target.value)}
+        <input type="search" id="search" placeholder="Digite o nome da cidade..."
+            onChange={(e) => setQueryReq(e.target.value)}
+            onBlur={(e) => e.target.value = ''}
             className="p-2 w-full bg-gray-200 rounded-lg shadow-lg" />
     );
 }
@@ -64,6 +66,9 @@ function App() {
 
     useEffect(() => {
         getWeatherForecast(location.latitude, location.longitude);
+        if (location.name) {
+            document.querySelector('#search').value = location.name;
+        }
         setQueryRes();
     }, [location]);
 
