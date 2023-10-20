@@ -22,10 +22,19 @@ function SearchSel({ queryRes, setLocation }) {
 }
 
 function CurrentWeather({ location, forecast }) {
+    console.log(forecast);
     return (
         <ul>
             <li>Cidade: {location.name}</li>
             <li>Temperatura: {forecast.temperature_2m}</li>
+            <li>Sensação térmica: {forecast.apparent_temperature}</li>
+            <li>Precipitação: {forecast.precipitation}</li>
+            <li>Umidade relativa do ar: {forecast.relativehumidity_2m}</li>
+            <li>Velociadade do vento: {forecast.windspeed_10m}</li>
+            {/* <li>Intervalo: {forecast.interval}</li>
+            <li>isDay: {forecast.is_day}</li>
+            <li>Tempo: {forecast.time}</li>
+            <li>Weather code: {forecast.weathercode}</li> */}
         </ul>
     );
 }
@@ -66,9 +75,6 @@ function App() {
 
     useEffect(() => {
         getWeatherForecast(location.latitude, location.longitude);
-        if (location.name) {
-            document.querySelector('#search').value = location.name;
-        }
         setQueryRes();
     }, [location]);
 
