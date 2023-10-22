@@ -3,7 +3,7 @@ import cx from 'classnames';
 
 function SearchBox({ setQueryReq }) {
     return (
-        <input type="search" id="search" placeholder="Digite o nome da cidade..."
+        <input type="search" id="search" placeholder="Search by city name..."
             onChange={(e) => setQueryReq(e.target.value)}
             onBlur={(e) => e.target.value = ''}
             className="p-2 w-full bg-gray-200 rounded-lg shadow-lg" />
@@ -21,20 +21,18 @@ function SearchSel({ queryRes, setLocation }) {
     );
 }
 
-function CurrentWeather({ location, forecast }) {
-    console.log(forecast);
+function WeatherOverview({ location, forecast }) {
+    const date = new Date();
+    const diso = date.toISOString();
+    const dval = diso.replace(diso.slice(-10), '00');
+    const dkey = forecast.hourly.time.indexOf(dval);
+
     return (
         <ul>
-            <li>Cidade: {location.name}</li>
-            <li>Temperatura: {forecast.temperature_2m}</li>
-            <li>Sensação térmica: {forecast.apparent_temperature}</li>
-            <li>Precipitação: {forecast.precipitation}</li>
-            <li>Umidade relativa do ar: {forecast.relativehumidity_2m}</li>
-            <li>Velociadade do vento: {forecast.windspeed_10m}</li>
-            {/* <li>Intervalo: {forecast.interval}</li>
-            <li>isDay: {forecast.is_day}</li>
-            <li>Tempo: {forecast.time}</li>
-            <li>Weather code: {forecast.weathercode}</li> */}
+            <li>{location.name}</li>
+            <li>{forecast.current.temperature_2m}</li>
+            <li>{forecast.hourly.precipitation_probability[dkey]}</li>
+            <li>{forecast.current.weathercode}</li>
         </ul>
     );
 }
@@ -49,7 +47,7 @@ function App() {
 
     async function getLocalGeocodings(queryReq) {
         const req = queryReq.replace(/\s/g, '+');
-        const url = `https://geocoding-api.open-meteo.com/v1/search?name=${req}&count=5&language=pt&format=json`;
+        const url = `https://geocoding-api.open-meteo.com/v1/search?name=${req}&count=5&language=en&format=json`;
         const res = await fetch(url);
         const obj = await res.json();
 
@@ -88,16 +86,13 @@ function App() {
                         {queryRes ? <SearchSel queryRes={queryRes} setLocation={setLocation} /> : null}
                     </div>
                     <div className="flex-grow grid grid-rows-3 gap-4">
-                        {isOnLoad ? location.name ? <p>Carregando</p> : <p>Selecione uma cidade</p> :
-                            <CurrentWeather location={location} forecast={forecast.current} />}
-                        {isOnLoad ? location.name ? <p>Carregando</p> : <p>Selecione uma cidade</p> :
-                            <CurrentWeather location={location} forecast={forecast.current} />}
-                        {isOnLoad ? location.name ? <p>Carregando</p> : <p>Selecione uma cidade</p> :
-                            <CurrentWeather location={location} forecast={forecast.current} />}
+                        {isOnLoad ? location.name ? <p>Loading</p> : <p>Please select a city</p> :
+                            <WeatherOverview location={location} forecast={forecast} />}
+                        <article>atigo 2</article>
+                        <article>atigo 3</article>
                     </div>
                 </section>
-                {isOnLoad ? location.name ? <p>Carregando</p> : <p>Selecione uma cidade</p> :
-                    <CurrentWeather location={location} forecast={forecast.current} />}
+                <aside>aside</aside>
             </div>
         </div>
     );
