@@ -21,18 +21,21 @@ function SearchSel({ queryRes, setLocation }) {
     );
 }
 
-function WeatherOverview({ location, forecast }) {
+function WeatherOverview({ location, forecast, icons }) {
     const date = new Date();
-    const diso = date.toISOString();
-    const dval = diso.replace(diso.slice(-10), '00');
-    const dkey = forecast.hourly.time.indexOf(dval);
+    const iso = date.toISOString();
+    const val = iso.replace(iso.slice(-10), '00');
+    const key = forecast.hourly.time.indexOf(val);
+
+    const code = forecast.current.weathercode;
+    const time = forecast.current.is_day ? 'day' : 'night';
 
     return (
         <ul>
             <li>{location.name}</li>
             <li>{forecast.current.temperature_2m}</li>
-            <li>{forecast.hourly.precipitation_probability[dkey]}</li>
-            <li>{forecast.current.weathercode}</li>
+            <li>{forecast.hourly.precipitation_probability[key]}</li>
+            <img src={icons[code][time].image} />
         </ul>
     );
 }
@@ -44,6 +47,7 @@ function App() {
     const [queryRes, setQueryRes] = useState([]);
     const [location, setLocation] = useState({});
     const [forecast, setForecast] = useState({});
+    const [wmoIcons, setWMOIcons] = useState({});
 
     async function getLocalGeocodings(queryReq) {
         const req = queryReq.replace(/\s/g, '+');
@@ -67,6 +71,14 @@ function App() {
         }
     }
 
+    async function getWeatherIcons() {
+        const url = 'https://gist.githubusercontent.com/stellasphere/9490c195ed2b53c707087c8c2db4ec0c/raw/76b0cb0ef0bfd8a2ec988aa54e30ecd1b483495d/descriptions.json';
+        const res = await fetch(url);
+        const obj = await res.json();
+
+        setWMOIcons(obj);
+    }
+
     useEffect(() => {
         getLocalGeocodings(queryReq);
     }, [queryReq]);
@@ -75,6 +87,10 @@ function App() {
         getWeatherForecast(location.latitude, location.longitude);
         setQueryRes();
     }, [location]);
+
+    useEffect(() => {
+        getWeatherIcons();
+    }, []);
 
     return (
         <div className={cx('font-["Open_Sans"]', { 'dark': darkMode })}>
@@ -87,7 +103,7 @@ function App() {
                     </div>
                     <div className="flex-grow grid grid-rows-3 gap-4">
                         {isOnLoad ? location.name ? <p>Loading</p> : <p>Please select a city</p> :
-                            <WeatherOverview location={location} forecast={forecast} />}
+                            <WeatherOverview location={location} forecast={forecast} icons={wmoIcons} />}
                         <article>atigo 2</article>
                         <article>atigo 3</article>
                     </div>
