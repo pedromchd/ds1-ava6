@@ -31,12 +31,16 @@ function WeatherOverview({ location, forecast, icons }) {
     const time = forecast.current.is_day ? 'day' : 'night';
 
     return (
-        <ul>
-            <li>{location.name}</li>
-            <li>{forecast.current.temperature_2m}</li>
-            <li>{forecast.hourly.precipitation_probability[key]}</li>
-            <img src={icons[code][time].image} />
-        </ul>
+        <article className="p-4 grid grid-cols-2 place-items-center">
+            <div className="h-[80%] flex flex-col justify-between">
+                <div>
+                    <p className="text-4xl font-extrabold">{location.name}</p>
+                    <p className="text-xl font-light">Precipitação: {forecast.hourly.precipitation_probability[key]}%</p>
+                </div>
+                <p className="text-6xl font-bold">{forecast.current.temperature_2m}°C</p>
+            </div>
+            <img src={icons[code][time].image} className="h-[100%]" />
+        </article>
     );
 }
 
@@ -95,8 +99,8 @@ function App() {
     return (
         <div className={cx('font-["Open_Sans"]', { 'dark': darkMode })}>
             {/* <button onClick={() => setDarkMode(!darkMode)}>Set dark mode</button> */}
-            <div className="h-screen p-4 bg-gray-50 grid grid-cols-3 gap-4">
-                <section className="col-span-2 flex flex-col gap-4">
+            <div className="h-screen p-4 bg-gray-50 grid grid-cols-5 gap-4">
+                <section className="col-span-3 flex flex-col gap-4">
                     <div className="relative text-lg">
                         <SearchBox setQueryReq={setQueryReq} />
                         {queryRes ? <SearchSel queryRes={queryRes} setLocation={setLocation} /> : null}
