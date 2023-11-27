@@ -33,7 +33,7 @@ function CurrentWeather({ location, forecast, icons }) {
             <div className="h-[80%] flex flex-col justify-between">
                 <div>
                     <p className="text-4xl font-extrabold">{location.name}</p>
-                    <p className="text-xl font-light">Precipitação: {forecast.hourly.precipitation_probability[hour]}%</p>
+                    <p className="text-xl font-light">{traduzirDescricao(code)}</p>
                 </div>
                 <p className="text-6xl font-bold">{forecast.current.temperature_2m}°C</p>
             </div>
@@ -54,11 +54,12 @@ function HourlyWeather({ forecast, icons }) {
         const time = hours > 5 && hours < 18 ? 'day' : 'night';
         hourly.push(
             <div className="flex flex-col items-center">
-                <span className="font-bold text-sm text-gray-400">{hours}:00</span>
+                <p className="font-bold text-sm text-gray-400">{hours}:00</p>
                 <div className="w-20 h-20">
                     <img src={icons[code][time].image} />
                 </div>
-                <span className="text-lg font-bold">{temp}°C</span>
+                <p className="text-lg font-bold">{temp}°C</p>
+                <p className="text-sm text-gray-500">☂️ {forecast.hourly.precipitation_probability[hours]}%</p>
             </div>
         );
         hours++;
@@ -76,7 +77,7 @@ function WeatherOverview({ forecast }) {
     const hour = date.getHours();
 
     return (
-        <article className="shadow-lg rounded-xl p-4 roundedx-xl bg-white grid grid-cols-2 gap-3 items-center">
+        <article className="shadow-lg rounded-xl p-8 roundedx-xl bg-white grid grid-cols-2 gap-3 items-center">
             <div>
                 <p className="font-bold text-sm text-gray-400">Sensação térmica</p>
                 <p className="mt-3 font-bold text-4xl">{forecast.current.apparent_temperature} °C</p>
@@ -94,6 +95,37 @@ function WeatherOverview({ forecast }) {
                 <p className="mt-3 font-bold text-4xl">{forecast.hourly.uv_index[hour]}</p>
             </div>
         </article>
+    );
+}
+
+function DailyWeather({ forecast, icons }) {
+    const days = [];
+
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(forecast.daily.time[i]);
+        const week = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][date.getDay()];
+
+        const code = forecast.daily.weathercode[i];
+        const time = forecast.current.is_day ? 'day' : 'night';
+        days.push(
+            <div className="grid grid-cols-5 items-center">
+                <span className="font-bold text-gray-400">{week}</span>
+                <div className="col-span-3 flex items-center justify-start gap-2">
+                    <img src={icons[code][time].image} />
+                    <span>{traduzirDescricao(code)}</span>
+                </div>
+                <div>
+                    <span className="font-bold">{forecast.daily.temperature_2m_max[i]}</span>
+                    <span className="font-bold text-gray-400">/{forecast.daily.temperature_2m_min[i]}</span>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <aside className="col-span-2 shadow-lg rounded-xl p-4 roundedx-xl bg-white grid grid-rows-7 gap-3">
+            {days}
+        </aside>
     );
 }
 
@@ -149,7 +181,7 @@ function App() {
     }, []);
 
     return (
-        <div className={cx('font-["Open_Sans"]')}>
+        <div className={cx('font-["Open_Sans"]',)}>
             {/* <button onClick={() => setDarkMode(!darkMode)}>Set dark mode</button> */}
             <div className="h-screen p-4 bg-gray-50 grid grid-cols-5 gap-4">
                 <section className="col-span-3 flex flex-col gap-4">
@@ -166,10 +198,74 @@ function App() {
                             <WeatherOverview forecast={forecast} />}
                     </div>
                 </section>
-                <aside>aside</aside>
+                {isOnLoad ? location.name ? <p>Loading</p> : <p>Please select a city</p> :
+                    <DailyWeather forecast={forecast} icons={wmoIcons} />}
             </div>
         </div>
     );
+}
+
+function traduzirDescricao(codigo) {
+    switch (codigo) {
+        case 0:
+            return 'Céu limpo';
+        case 1:
+            return 'Principalmente limpo';
+        case 2:
+            return 'Parcialmente nublado';
+        case 3:
+            return 'Nublado';
+        case 45:
+            return 'Neblina';
+        case 48:
+            return 'Neblina depositando geada';
+        case 51:
+            return 'Chuvisco leve';
+        case 53:
+            return 'Chuvisco moderado';
+        case 55:
+            return 'Chuvisco denso';
+        case 56:
+            return 'Chuvisco congelante leve';
+        case 57:
+            return 'Chuvisco congelante denso';
+        case 61:
+            return 'Chuva leve';
+        case 63:
+            return 'Chuva moderada';
+        case 65:
+            return 'Chuva intensa';
+        case 66:
+            return 'Chuva congelante leve';
+        case 67:
+            return 'Chuva congelante intensa';
+        case 71:
+            return 'Queda de neve leve';
+        case 73:
+            return 'Queda de neve moderada';
+        case 75:
+            return 'Queda de neve intensa';
+        case 77:
+            return 'Granizo de neve';
+        case 80:
+            return 'Chuvas leves';
+        case 81:
+            return 'Chuvas moderadas';
+        case 82:
+            return 'Chuvas violentas';
+        case 85:
+            return 'Nevascas leves';
+        case 86:
+            return 'Nevascas intensas';
+        case 95:
+            return 'Trovoada leve ou moderada';
+        case 96:
+            return 'Trovoada com granizo leve';
+        case 99:
+            return 'Trovoada com granizo intenso';
+        default:
+            return 'Descrição não encontrada';
+    }
 }
 
 export default App;
