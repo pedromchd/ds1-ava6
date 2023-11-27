@@ -21,11 +21,9 @@ function SearchSel({ queryRes, setLocation }) {
     );
 }
 
-function WeatherOverview({ location, forecast, icons }) {
+function CurrentWeather({ location, forecast, icons }) {
     const date = new Date();
-    const iso = date.toISOString();
-    const val = iso.replace(iso.slice(-10), '00');
-    const key = forecast.hourly.time.indexOf(val);
+    const hour = date.getHours();
 
     const code = forecast.current.weathercode;
     const time = forecast.current.is_day ? 'day' : 'night';
@@ -35,7 +33,7 @@ function WeatherOverview({ location, forecast, icons }) {
             <div className="h-[80%] flex flex-col justify-between">
                 <div>
                     <p className="text-4xl font-extrabold">{location.name}</p>
-                    <p className="text-xl font-light">Precipitação: {forecast.hourly.precipitation_probability[key]}%</p>
+                    <p className="text-xl font-light">Precipitação: {forecast.hourly.precipitation_probability[hour]}%</p>
                 </div>
                 <p className="text-6xl font-bold">{forecast.current.temperature_2m}°C</p>
             </div>
@@ -51,7 +49,6 @@ function HourlyWeather({ forecast, icons }) {
     const hourly = [];
 
     while (hours < 24) {
-        const hour = forecast.hourly.time[hours];
         const temp = forecast.hourly.temperature_2m[hours];
         const code = forecast.hourly.weathercode[hours];
         const time = hours > 5 && hours < 18 ? 'day' : 'night';
@@ -68,14 +65,39 @@ function HourlyWeather({ forecast, icons }) {
     }
 
     return (
-        <div className="p-4 rounded-xl bg-white flex items-center gap-3 overflow-x-auto">
+        <div className="shadow-lg p-4 rounded-xl bg-white flex items-center gap-3 overflow-x-auto">
             {hourly}
         </div>
     );
 }
 
+function WeatherOverview({ forecast }) {
+    const date = new Date();
+    const hour = date.getHours();
+
+    return (
+        <article className="shadow-lg rounded-xl p-4 roundedx-xl bg-white grid grid-cols-2 gap-3 items-center">
+            <div>
+                <p className="font-bold text-sm text-gray-400">Sensação térmica</p>
+                <p className="mt-3 font-bold text-4xl">{forecast.current.apparent_temperature} °C</p>
+            </div>
+            <div>
+                <p className="font-bold text-sm text-gray-400">Velocidade do vento</p>
+                <p className="mt-3 font-bold text-4xl">{forecast.current.windspeed_10m} km/h</p>
+            </div>
+            <div>
+                <p className="font-bold text-sm text-gray-400">Umidade do ar</p>
+                <p className="mt-3 font-bold text-4xl">{forecast.current.relativehumidity_2m} %</p>
+            </div>
+            <div>
+                <p className="font-bold text-sm text-gray-400">Índice UV</p>
+                <p className="mt-3 font-bold text-4xl">{forecast.hourly.uv_index[hour]}</p>
+            </div>
+        </article>
+    );
+}
+
 function App() {
-    const [darkMode, setDarkMode] = useState(false);
     const [isOnLoad, setIsOnload] = useState(true);
     const [queryReq, setQueryReq] = useState('');
     const [queryRes, setQueryRes] = useState([]);
@@ -85,7 +107,7 @@ function App() {
 
     async function getLocalGeocodings(queryReq) {
         const req = queryReq.replace(/\s/g, '+');
-        const url = `https://geocoding-api.open-meteo.com/v1/search?name=${req}&count=5&language=en&format=json`;
+        const url = `https://geocoding-api.open-meteo.com/v1/search?name=${req}&count=5&language=pt&format=json`;
         const res = await fetch(url);
         const obj = await res.json();
 
@@ -127,7 +149,7 @@ function App() {
     }, []);
 
     return (
-        <div className={cx('font-["Open_Sans"]', { 'dark': darkMode })}>
+        <div className={cx('font-["Open_Sans"]')}>
             {/* <button onClick={() => setDarkMode(!darkMode)}>Set dark mode</button> */}
             <div className="h-screen p-4 bg-gray-50 grid grid-cols-5 gap-4">
                 <section className="col-span-3 flex flex-col gap-4">
@@ -137,10 +159,11 @@ function App() {
                     </div>
                     <div className="flex-grow grid grid-rows-3 gap-4">
                         {isOnLoad ? location.name ? <p>Loading</p> : <p>Please select a city</p> :
-                            <WeatherOverview location={location} forecast={forecast} icons={wmoIcons} />}
+                            <CurrentWeather location={location} forecast={forecast} icons={wmoIcons} />}
                         {isOnLoad ? location.name ? <p>Loading</p> : <p>Please select a city</p> :
                             <HourlyWeather forecast={forecast} icons={wmoIcons} />}
-                        <article>atigo 3</article>
+                        {isOnLoad ? location.name ? <p>Loading</p> : <p>Please select a city</p> :
+                            <WeatherOverview forecast={forecast} />}
                     </div>
                 </section>
                 <aside>aside</aside>
