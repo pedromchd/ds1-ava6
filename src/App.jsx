@@ -44,6 +44,36 @@ function WeatherOverview({ location, forecast, icons }) {
     );
 }
 
+function HourlyWeather({ forecast, icons }) {
+    const date = new Date();
+    let hours = date.getHours();
+
+    const hourly = [];
+
+    while (hours < 24) {
+        const hour = forecast.hourly.time[hours];
+        const temp = forecast.hourly.temperature_2m[hours];
+        const code = forecast.hourly.weathercode[hours];
+        const time = hours > 5 && hours < 18 ? 'day' : 'night';
+        hourly.push(
+            <div className="flex flex-col items-center">
+                <span className="font-bold text-sm text-gray-400">{hours}:00</span>
+                <div className="w-20 h-20">
+                    <img src={icons[code][time].image} />
+                </div>
+                <span className="text-lg font-bold">{temp}°C</span>
+            </div>
+        );
+        hours++;
+    }
+
+    return (
+        <div className="p-4 rounded-xl bg-white flex items-center gap-3 overflow-x-auto">
+            {hourly}
+        </div>
+    );
+}
+
 function App() {
     const [darkMode, setDarkMode] = useState(false);
     const [isOnLoad, setIsOnload] = useState(true);
@@ -108,7 +138,8 @@ function App() {
                     <div className="flex-grow grid grid-rows-3 gap-4">
                         {isOnLoad ? location.name ? <p>Loading</p> : <p>Please select a city</p> :
                             <WeatherOverview location={location} forecast={forecast} icons={wmoIcons} />}
-                        <article>atigo 2</article>
+                        {isOnLoad ? location.name ? <p>Loading</p> : <p>Please select a city</p> :
+                            <HourlyWeather forecast={forecast} icons={wmoIcons} />}
                         <article>atigo 3</article>
                     </div>
                 </section>
