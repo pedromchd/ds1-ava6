@@ -110,7 +110,7 @@ function DailyWeather({ forecast, icons }) {
         days.push(
             <div className="grid grid-cols-5 items-center">
                 <span className="font-bold text-gray-400">{week}</span>
-                <div className="col-span-3 flex items-center justify-start gap-2">
+                <div className="col-span-3 flex items-center justify-start gap-2 mr-3">
                     <img src={icons[code][time].image} />
                     <span>{traduzirDescricao(code)}</span>
                 </div>
